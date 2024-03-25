@@ -1,11 +1,18 @@
 from  threading import Thread
-from knight import Knight
+from knightcollection.knight import Knight
 import os
 import pickle
 
 class Menu(Thread):
 
     """
+    This class represents the menu for the program
+    This class will be used to create a menu for the program
+    This class will also be used to create a knight and update a knight
+    This class will also be used to delete a knight and show all knights
+
+    params:
+        no params
     
     """
 
@@ -20,18 +27,14 @@ class Menu(Thread):
         if not os.path.exists(self.pickle_file):
             with open(self.pickle_file, "wb") as file:
                 pickle.dump(self.knights_list, file)
-        #read the file
-        self.writeOrRead("rw")
 
     #method for reading and writing to the pickle file
     def writeOrRead(self,mode):
         try:
-            if mode == "rw":
+            if mode == "rb":
                 with open(self.pickle_file,mode) as file:
                     self.knights_list = pickle.load(file)
                     self.knights_number = len(self.knights_list)                    
-                    print(self.knights_list, self.knights_number) 
-                    raise Exception("error")
             elif mode == "wb":
                 with open(self.pickle_file,mode) as file:
                     pickle.dump(self.knights_list, file)
@@ -41,7 +44,7 @@ class Menu(Thread):
             print("error reading file")
 
     #create a knight
-    def create_knights(self,knight_number):
+    def create_knights(self):
         global knights_list 
         #ask the user for the information of the knight
         print("lets create a knights")
@@ -173,55 +176,50 @@ class Menu(Thread):
         print("3: delete  a  knight")
         print("4: show all your  knight")    
         print("0:Exit")
-        try:
-            with open(self.pickle_file, "rb") as file:
-                self.knights_list = pickle.load(file)
-                knights_number = len(self.knights_list)
-        except Exception as e:
-            print("error")
+        
+        #read the file to get the knights list and number of knights
+        self.writeOrRead("rb")
 
-        #allow a selection to be tested 
+        #after menu is displayed get the user input and run the selection.
+        #this will also catch any errors that are not numbers
         try:
             selection = int(input("select select a number:"))
-            print() # create a blank line
-
             if selection == 1:
-                
-                self.knights_number += 1
-
-                self.create_knights(self.knights_number)
+                self.create_knights()
                 self.menu() 
             elif selection == 2:
                 if int(len(self.knights_list)) == 0:
                     print("you need to create a knight first \n")
+                    input("press any key to continue")
                 else:
                     self.select_knights("update")
                 self.menu()
             elif selection == 3:
                 if int(len(self.knights_list)) == 0:
                     print("you need to create a knight first \n")
+                    input("press any key to continue")
                 else:
                     self.select_knights("delete")
                 self.menu()
             elif selection == 4:
                 self.show_all_knights()
+
             elif selection == 0:
                 print("goodbye")
                 return
 
-            #required for catching an integer
+            #required for catching an not in list integer
             else:
                 print("---try again---")
                 self.menu()
-        #we are loruning integer select
+        #catch the error if the user does not enter a number
         except ValueError:
-            print("---try again---")
-            print("please select a number")
             self.menu()
 
     #run the program
-    #condition below check if this file is the main file that is being run
-    #this is important because if this file is being imported into another file
-    #this code will not run
+    #this is the main method that will be called to run the program
+    #this is is called because of thread class inheritance
+    #this will call the menu method
     def run(self):
-        pass
+        self.writeOrRead("rb")
+        self.menu()
